@@ -1,0 +1,201 @@
+{% extends 'pricing/base.html' %}
+
+{% block title %}{{ config.name }} - Pricing Configuration{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>{{ config.name }}</h1>
+            <div>
+                <a href="{% url 'pricing_config_edit' config.pk %}" class="btn btn-warning">Edit Configuration</a>
+                <a href="{% url 'pricing_config_delete' config.pk %}" class="btn btn-danger">Delete Configuration</a>
+                <a href="{% url 'pricing_config_list' %}" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Configuration Details</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Status:</strong> 
+                    {% if config.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </p>
+                <p><strong>Created:</strong> {{ config.created_at|date:"Y-m-d H:i" }}</p>
+                <p><strong>Last Updated:</strong> {{ config.updated_at|date:"Y-m-d H:i" }}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Distance Base Prices</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Days</th>
+                                        <th>Base Distance</th>
+                                        <th>Base Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for price in base_prices %}
+                                    <tr>
+                                        <td>{{ price.get_day_names|join:", " }}</td>
+                                        <td>{{ price.base_distance }} KM</td>
+                                        <td>{{ price.base_price }} INR</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">No base prices configured</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Distance Additional Prices</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Price per KM</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for price in additional_prices %}
+                                    <tr>
+                                        <td>{{ price.price_per_km }} INR</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="1" class="text-center">No additional prices configured</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Time Multiplier Factors</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Time Threshold</th>
+                                        <th>Multiplier</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for multiplier in time_multipliers %}
+                                    <tr>
+                                        <td>{{ multiplier.time_threshold }} minutes</td>
+                                        <td>{{ multiplier.multiplier }}x</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="2" class="text-center">No time multipliers configured</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Waiting Charges</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Initial Wait Time</th>
+                                        <th>Charge per Interval</th>
+                                        <th>Interval</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for charge in waiting_charges %}
+                                    <tr>
+                                        <td>{{ charge.initial_wait_time }} minutes</td>
+                                        <td>{{ charge.charge_per_interval }} INR</td>
+                                        <td>{{ charge.interval_minutes }} minutes</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">No waiting charges configured</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% if change_logs %}
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Recent Changes</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>User</th>
+                                <th>Timestamp</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in change_logs %}
+                            <tr>
+                                <td>{{ log.action }}</td>
+                                <td>{{ log.user }}</td>
+                                <td>{{ log.timestamp|date:"Y-m-d H:i" }}</td>
+                                <td><pre class="mb-0">{{ log.details|pprint }}</pre></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %} 

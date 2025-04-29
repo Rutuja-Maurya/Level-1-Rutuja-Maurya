@@ -1,0 +1,51 @@
+{% extends 'pricing/base.html' %}
+
+{% block title %}Pricing Configurations{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">Pricing Configurations</h1>
+        <a href="{% url 'pricing_config_create' %}" class="btn btn-primary mb-3">Create New Configuration</a>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Updated</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for config in configs %}
+                    <tr>
+                        <td>{{ config.name }}</td>
+                        <td>
+                            {% if config.is_active %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ config.created_at|date:"Y-m-d H:i" }}</td>
+                        <td>{{ config.updated_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <a href="{% url 'pricing_config_detail' config.pk %}" class="btn btn-sm btn-info">View</a>
+                            <a href="{% url 'pricing_config_edit' config.pk %}" class="btn btn-sm btn-warning">Edit</a>
+                            <a href="{% url 'pricing_config_delete' config.pk %}" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center">No pricing configurations found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %} 
