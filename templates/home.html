@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Delivery Management System{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 text-center mb-4">
+        <h1 class="display-4">Welcome to Delivery Management System</h1>
+        <p class="lead">Manage your delivery operations efficiently</p>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <i class="bi bi-currency-rupee display-4 text-primary mb-3"></i>
+                <h5 class="card-title">Pricing Module</h5>
+                <p class="card-text">Configure and manage delivery pricing with dynamic calculations based on distance, time, and waiting charges.</p>
+                <a href="{% url 'pricing_config_list' %}" class="btn btn-primary">
+                    <i class="bi bi-arrow-right"></i> Go to Pricing
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-8 mx-auto">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="list-group">
+                    <a href="{% url 'pricing_config_list' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-list-check"></i> View Pricing Configurations
+                    </a>
+                    <a href="{% url 'price_calculator' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-calculator"></i> Calculate Delivery Price
+                    </a>
+                    <a href="{% url 'pricing_config_create' %}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-plus-circle"></i> Create New Pricing Configuration
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,146 @@
+{% extends 'pricing/base.html' %}
+
+{% block title %}Price Calculator{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Price Calculator</h5>
+            </div>
+            <div class="card-body">
+                <form id="calculatorForm">
+                    <div class="mb-3">
+                        <label for="distance" class="form-label">Distance (KM)</label>
+                        <input type="number" class="form-control" id="distance" name="distance" step="0.1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Duration (Minutes)</label>
+                        <input type="number" class="form-control" id="duration" name="duration" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="waiting_time" class="form-label">Waiting Time (Minutes)</label>
+                        <input type="number" class="form-control" id="waiting_time" name="waiting_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="day_of_week" class="form-label">Day of Week</label>
+                        <select class="form-select" id="day_of_week" name="day_of_week" required>
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Calculate Price</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Price Breakdown</h5>
+            </div>
+            <div class="card-body">
+                <div id="resultSection" style="display: none;">
+                    <div class="mb-4">
+                        <h6 class="text-muted">Distance Charges</h6>
+                        <div class="ms-3">
+                            <p class="mb-1">Base Price: <span id="basePrice" class="fw-bold"></span></p>
+                            <p class="mb-1">Additional Distance: <span id="additionalDistance" class="fw-bold"></span> KM</p>
+                            <p class="mb-1">Additional Price: <span id="additionalPrice" class="fw-bold"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted">Time Factors</h6>
+                        <div class="ms-3">
+                            <p class="mb-1">Time Multiplier: <span id="timeMultiplier" class="fw-bold"></span>x</p>
+                            <p class="mb-1">Time Adjusted Fare: <span id="timeAdjustedFare" class="fw-bold"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted">Additional Charges</h6>
+                        <div class="ms-3">
+                            <p class="mb-1">Total Waiting Time: <span id="totalWaitingTime" class="fw-bold"></span> minutes</p>
+                            <p class="mb-1">Initial Free Time: <span id="initialFreeTime" class="fw-bold"></span> minutes</p>
+                            <p class="mb-1">Chargeable Time: <span id="chargeableTime" class="fw-bold"></span> minutes</p>
+                            <p class="mb-1">Rate: ₹<span id="chargePerInterval" class="fw-bold"></span> per <span id="intervalMinutes" class="fw-bold"></span> minutes</p>
+                            <p class="mb-1">Intervals Charged: <span id="intervalsCharged" class="fw-bold"></span></p>
+                            <p class="mb-1">Total Waiting Charges: <span id="waitingCharge" class="fw-bold"></span></p>
+                        </div>
+                    </div>
+
+                    <div class="border-top pt-3">
+                        <h4 class="text-primary">Final Price: <span id="finalPrice" class="fw-bold"></span></h4>
+                    </div>
+                </div>
+                <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('calculatorForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        distance: parseFloat(document.getElementById('distance').value),
+        duration: parseInt(document.getElementById('duration').value),
+        waiting_time: parseInt(document.getElementById('waiting_time').value),
+        day_of_week: parseInt(document.getElementById('day_of_week').value)
+    };
+
+    try {
+        const response = await fetch('{% url "calculate_price" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            document.getElementById('resultSection').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+
+            // Update the price breakdown
+            document.getElementById('basePrice').textContent = `₹${data.breakdown.distance_base_price}`;
+            document.getElementById('additionalDistance').textContent = data.breakdown.additional_distance;
+            document.getElementById('additionalPrice').textContent = `₹${data.breakdown.additional_distance_price}`;
+            document.getElementById('timeMultiplier').textContent = data.breakdown.time_multiplier;
+            document.getElementById('timeAdjustedFare').textContent = `₹${data.time_adjusted_fare}`;
+            
+            // Update waiting charges breakdown
+            document.getElementById('totalWaitingTime').textContent = data.breakdown.waiting_time_details.total_waiting_time;
+            document.getElementById('initialFreeTime').textContent = data.breakdown.waiting_time_details.initial_free_time;
+            document.getElementById('chargeableTime').textContent = data.breakdown.waiting_time_details.chargeable_time;
+            document.getElementById('chargePerInterval').textContent = data.breakdown.waiting_time_details.charge_per_interval;
+            document.getElementById('intervalMinutes').textContent = data.breakdown.waiting_time_details.interval_minutes;
+            document.getElementById('intervalsCharged').textContent = data.breakdown.waiting_time_details.intervals_charged;
+            document.getElementById('waitingCharge').textContent = `₹${data.breakdown.waiting_charge}`;
+            
+            document.getElementById('finalPrice').textContent = `₹${data.final_price}`;
+        } else {
+            document.getElementById('resultSection').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'block';
+            document.getElementById('errorMessage').textContent = data.error || 'An error occurred while calculating the price.';
+        }
+    } catch (error) {
+        document.getElementById('resultSection').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'block';
+        document.getElementById('errorMessage').textContent = 'An error occurred while calculating the price.';
+    }
+});
+</script>
+{% endblock %} 
